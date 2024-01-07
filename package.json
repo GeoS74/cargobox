@@ -1,0 +1,32 @@
+{
+  "name": "cargobox",
+  "version": "0.0.1",
+  "description": "cargobox calculation",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npx tsc",
+    "lint": "eslint ./src",
+    "lint:fix": "eslint ./src --fix",
+    "db:init": "ts-node ./src/libs/db.init.ts",
+    "db:drop": "ts-node ./src/libs/db.init.ts --drop",
+    "db:load": "ts-node ./src/libs/db.load.ts --clean"
+  },
+  "author": "GeoS",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20.10.6",
+    "@types/pg": "^8.10.9",
+    "@typescript-eslint/eslint-plugin": "^6.18.0",
+    "@typescript-eslint/parser": "^6.18.0",
+    "eslint": "^8.56.0",
+    "eslint-config-airbnb-typescript": "^17.1.0",
+    "ts-node": "^10.9.2"
+  },
+  "dependencies": {
+    "dbffile": "^1.9.3",
+    "log4js": "^6.9.1",
+    "pg": "^8.11.3",
+    "pg-types": "^4.0.1"
+  }
+}
