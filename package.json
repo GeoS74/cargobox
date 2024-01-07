@@ -12,6 +12,10 @@
     "db:drop": "ts-node ./src/libs/db.init.ts --drop",
     "db:load": "ts-node ./src/libs/db.load.ts --clean"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/GeoS74/cargobox.git"
+  },
   "author": "GeoS",
   "license": "ISC",
   "devDependencies": {
