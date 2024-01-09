@@ -20,6 +20,7 @@
   "license": "ISC",
   "devDependencies": {
     "@types/koa": "^2.13.12",
+    "@types/koa-router": "^7.4.8",
     "@types/node": "^20.10.6",
     "@types/pg": "^8.10.9",
     "@typescript-eslint/eslint-plugin": "^6.18.0",
