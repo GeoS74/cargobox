@@ -1,6 +1,8 @@
 import Koa from 'koa';
-import config from './config';
+import errorCatcher from './middleware/error.catcher';
 
 const app = new Koa();
+
+app.use(errorCatcher);
 
 export default app;

@@ -49,14 +49,16 @@ const data: PoolConfig = {
       city.OCATD,
       city.STATUS,
     ])
-      .then((res) => {
+      .then(() => {
         if (counter % 250 === 0) {
           logger.info(`insert ${counter} rows in ${kladr.recordCount}`);
         }
       })
       // .then(() => logger.info('create table "cities"'))
       .catch((error) => logger.warn(error.message))
-      .finally(() => counter++);
+      .finally(() => {
+        counter += 1;
+      });
   }
 
   logger.info(`database "${config.postgres.database}" load complete`);
