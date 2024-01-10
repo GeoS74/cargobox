@@ -7,6 +7,8 @@ export class Bot{
   _parentSend(message: string) {
     if(process.send){
       switch(message) {
+        case 'kill':
+          process.exit(0);
         case 'state':
           process.send('world');
         default:
