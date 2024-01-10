@@ -1,16 +1,14 @@
 import path from 'path'
 import childProcess from 'child_process';
 import Router from 'koa-router'
+// import { IChildBot } from '_bot';
+import * as kladr from '../controllers/kladr.controller';
 
-const router = new Router({prefix: '/api/cargobox'})
-
-
+const router = new Router({prefix: '/api/cargobox/kladr'})
 interface IChildBot extends childProcess.ChildProcess {
   command?: (message: string) => Promise<unknown>
 }
-
 let bot: IChildBot;
-
 
 function _createBot(botName: string): IChildBot {
   const b: IChildBot = childProcess.fork(path.join(__dirname, '../child.process/bot.create'), [], {
@@ -54,5 +52,10 @@ router.get('/', async ctx => {
   ctx.status = 200;
   ctx.body = 'bot is runnung';
 })
+
+
+
+router.get('/update', kladr.update, kladr.go);
+
 
 export default router.routes();
