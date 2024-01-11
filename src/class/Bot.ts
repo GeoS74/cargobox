@@ -1,4 +1,4 @@
-export class Bot{
+export default class Bot{
 
   constructor() {
     process.on('message', (message: string) => this._parentSend(message));
@@ -9,6 +9,8 @@ export class Bot{
       switch(message) {
         case 'kill':
           process.exit(0);
+        case 'hello':
+          process.send('world');
         case 'state':
           process.send('world');
         default:

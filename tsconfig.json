@@ -1,4 +1,15 @@
 {
+  "ts-node"  :  { 
+    // Пропустить проверку типов быстрее. 
+     // Удалите, если хотите, чтобы ts-node выполнял проверку типов. 
+    //  "transpileOnly"  :  true  , 
+    "files"  :  true  , 
+    "compilerOptions"  :  { 
+      // указанные здесь параметры компилятора переопределят объявленные ниже, 
+      // но *только* в ts-node.   Полезно, если вы хотите, чтобы ts-node и tsc использовали 
+      // разные параметры с одним tsconfig.json. 
+     } 
+  } , 
   "compilerOptions": {
     /* Visit https://aka.ms/tsconfig to read more about this file */
 

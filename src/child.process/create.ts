@@ -1,3 +1,22 @@
+import path from 'path'
+import childProcess from 'child_process';
+import { IChildBot } from '_bot';
+
+export function createBot(botName: botName): IChildBot {
+
+  const bot: IChildBot = childProcess.fork(path.join(__dirname, './run'), [], {
+    env:{botName}
+  });
+ 
+  bot.command = (message) => new Promise(res => {
+    if(bot.connected) {
+      bot.once('message', (answer) => res(answer));
+      bot.send(message)
+    }
+  })
+  return bot;
+}
+
 // process.on('message', (message) => {
 //   if(process.send){
 //     process.send(`you say ${message}`)
@@ -20,4 +39,4 @@
 // const {Bot} = require(`../class/${process.env.botName}`)
 // (() => new Bot())();
 
-process.exit();
+// process.exit();
