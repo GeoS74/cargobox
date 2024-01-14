@@ -1,4 +1,4 @@
-declare module "_bot" {
+declare module '_bot' {
   import childProcess from 'child_process';
 
   export interface IChildBot extends childProcess.ChildProcess {
@@ -6,4 +6,19 @@ declare module "_bot" {
   }
 }
 
-type botName = "Kladr"
+type botName = 'Kladr';
+
+interface IBot {
+  state: "run" | "wait"
+  error?: Error
+  
+  send(data: unknown): void
+  parentSend(message: string): void
+
+  getState(): {
+    state: Bot.state
+    error?: Error
+  }
+}
+
+

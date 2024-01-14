@@ -20,9 +20,9 @@
 // const {Bot} = require(`../class/${process.env.botName}`)
 // (() => new Bot())();
 
-import Kladr from "../class/Kladr";
+import Kladr from '../class/Kladr';
 
-switch(process.env.botName) {
+switch (process.env.botName) {
   case 'Kladr':
     new Kladr();
     break;

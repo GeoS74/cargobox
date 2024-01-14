@@ -10,4 +10,9 @@ export default {
     password: process.env.DB_PASS || 'admin',
     port: process.env.DB_PORT ? +process.env.DB_PORT : 5432,
   },
+  catalog: {
+    kladr: {
+      kladrdb: 'https://fias-file.nalog.ru/downloads/2024.01.12/base.7z',
+    },
+  }
 };
