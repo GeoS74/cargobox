@@ -12,7 +12,7 @@ export default {
   },
   catalog: {
     kladr: {
-      kladrdb: 'https://fias-file.nalog.ru/downloads/2024.01.12/base.7z',
+      db: 'https://fias-file.nalog.ru/downloads/2024.01.12/base.7z',
     },
-  }
+  },
 };

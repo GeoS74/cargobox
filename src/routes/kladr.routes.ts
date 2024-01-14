@@ -7,6 +7,12 @@ router.get(
   '/update',
   kladr.startBot,
   kladr.update,
+  // kladr.foo,
+);
+router.get(
+  '/state',
+  kladr.startBot,
+  kladr.state,
 );
 router.get('/stop', kladr.stopBot);
 

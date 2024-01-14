@@ -8,17 +8,13 @@ declare module '_bot' {
 
 type botName = 'Kladr';
 
+type BotState = 'run' | 'wait';
+
 interface IBot {
-  state: "run" | "wait"
-  error?: Error
-  
   send(data: unknown): void
   parentSend(message: string): void
-
   getState(): {
-    state: Bot.state
-    error?: Error
+    state: BotState
+    error?: string
   }
 }
-
-

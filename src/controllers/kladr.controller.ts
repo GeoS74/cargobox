@@ -12,17 +12,7 @@ export async function startBot(ctx: Context, next: Next) {
   await next();
 }
 
-export async function sayHello(ctx: Context, next: Next) {
-  if (ctx.bot.connected && ctx.bot.command) {
-    ctx.status = 400;
-    const f = await ctx.bot.command('hello');
-    ctx.body = f;
-    return;
-  }
-  ctx.throw(400);
-}
-
-export function stopBot(ctx: Context, next: Next) {
+export function stopBot(ctx: Context) {
   if (ctx.bot.connected) {
     ctx.bot.kill();
   }
@@ -30,7 +20,16 @@ export function stopBot(ctx: Context, next: Next) {
   ctx.body = 'bot stopped';
 }
 
-export async function update(ctx: Context, next: Next) {
+export async function update(ctx: Context) {
+  if (ctx.bot.connected && ctx.bot.command) {
+    ctx.status = 200;
+    ctx.body = await ctx.bot.command('update');
+    return;
+  }
+  ctx.throw(400);
+}
+
+export async function state(ctx: Context) {
   if (ctx.bot.connected && ctx.bot.command) {
     ctx.status = 200;
     ctx.body = await ctx.bot.command('state');
