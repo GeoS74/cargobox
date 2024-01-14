@@ -1,8 +1,12 @@
 import https from 'https';
-import { writeFile } from 'fs/promises';
+import { writeFile, unlink } from 'fs/promises';
 import config from '../config';
 import Bot from './Bot';
 import { loggerChildProcess } from '../libs/logger';
+
+// fs.unlink(file.filepath, (err) => {
+//   if (err) logger.error(err);
+// });
 
 export default class Kladr extends Bot {
   parentSend(message: string) {
@@ -18,6 +22,7 @@ export default class Kladr extends Bot {
 
   async update() {
     this.state = 'run';
+    this.error = undefined;
 
     try {
       await this.downloadKLADR();
@@ -29,7 +34,6 @@ export default class Kladr extends Bot {
     }
 
     this.state = 'wait';
-    this.error = undefined;
   }
 
   async downloadKLADR() {
