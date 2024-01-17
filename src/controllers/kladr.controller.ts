@@ -4,6 +4,17 @@ import { createBot } from '../child.process/create';
 
 let bot: IChildBot;
 
+export async function isRunningBot(ctx: Context, next: Next) {
+  if (ctx.bot.connected && ctx.bot.command) {
+    const answer = await ctx.bot.command('state');
+    console.log(answer)
+    if(answer.state === 'run') {
+      return await state(ctx);
+    }
+  }
+  await next();
+}
+
 export async function startBot(ctx: Context, next: Next) {
   if (!bot || !bot.connected) {
     bot = createBot('Kladr');

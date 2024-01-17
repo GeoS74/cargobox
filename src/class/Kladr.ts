@@ -12,8 +12,8 @@ export default class Kladr extends Bot {
   parentSend(message: string) {
     switch (message) {
       case 'update':
-        this.update();
         this.send({ message: 'kladr catalog update start' });
+        this.update();
         break;
       default:
         super.parentSend(message);
@@ -28,8 +28,8 @@ export default class Kladr extends Bot {
       await this.downloadKLADR();
     } catch (error) {
       if (error instanceof Error) {
-        loggerChildProcess.error(`download KLADR: ${error.message}`);
-        this.error = new Error(error.message);
+        loggerChildProcess.error(`update KLADR: ${error.message}`);
+        this.error = error;
       }
     }
 
@@ -38,7 +38,7 @@ export default class Kladr extends Bot {
 
   async downloadKLADR() {
     return new Promise((res, rej) => {
-      https.get(`${config.catalog.kladr.db}fail`, async (response) => {
+      https.get(`${config.catalog.kladr.db}`, async (response) => {
         if (response.statusCode !== 200) {
           return rej(new Error(`response status ${response.statusCode}`));
         }
