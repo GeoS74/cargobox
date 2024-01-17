@@ -8,9 +8,8 @@ router.get(
   '/update',
   tempFolder,
   kladr.startBot,
-  kladr.isRunningBot,
+  // kladr.isRunningBot,
   kladr.update,
-  // kladr.foo,
 );
 router.get(
   '/state',

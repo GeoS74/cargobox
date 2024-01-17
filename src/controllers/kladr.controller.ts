@@ -7,11 +7,12 @@ let bot: IChildBot;
 export async function isRunningBot(ctx: Context, next: Next) {
   if (ctx.bot.connected && ctx.bot.command) {
     const answer = await ctx.bot.command('state');
-    console.log(answer)
-    if(answer.state === 'run') {
-      return await state(ctx);
+
+    if (JSON.parse(answer).state === 'run') {
+      ctx.throw(400, 'bot run...');
     }
   }
+
   await next();
 }
 
@@ -33,8 +34,14 @@ export function stopBot(ctx: Context) {
 
 export async function update(ctx: Context) {
   if (ctx.bot.connected && ctx.bot.command) {
+    const answer = JSON.parse(await ctx.bot.command('update'));
+
+    if (answer?.error) {
+      ctx.throw(400, answer.error);
+    }
+
     ctx.status = 200;
-    ctx.body = await ctx.bot.command('update');
+    ctx.body = answer;
     return;
   }
   ctx.throw(400);

@@ -12,11 +12,14 @@ export default class Kladr extends Bot {
   parentSend(message: string) {
     switch (message) {
       case 'update':
-        this.send({ message: 'kladr catalog update start' });
-        this.update();
+        if (this.state !== 'run') {
+          this.send({ message: 'kladr catalog update start' });
+          this.update();
+        } else {
+          this.send({ error: 'bot run ...' });
+        }
         break;
-      default:
-        super.parentSend(message);
+      default: super.parentSend(message);
     }
   }
 
@@ -24,16 +27,16 @@ export default class Kladr extends Bot {
     this.state = 'run';
     this.error = undefined;
 
-    try {
-      await this.downloadKLADR();
-    } catch (error) {
-      if (error instanceof Error) {
-        loggerChildProcess.error(`update KLADR: ${error.message}`);
-        this.error = error;
-      }
-    }
-
-    this.state = 'wait';
+    // try {
+    //   await this.downloadKLADR();
+    // } catch (error) {
+    //   if (error instanceof Error) {
+    //     loggerChildProcess.error(`update KLADR: ${error.message}`);
+    //     this.error = error;
+    //   }
+    // }
+    //
+    // this.state = 'wait';
   }
 
   async downloadKLADR() {
