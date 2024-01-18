@@ -59,9 +59,11 @@ export default class Kladr extends Bot {
         if (response.statusCode !== 200) {
           rej(new Error(`response status ${response.statusCode}`));
         }
+
         await writeFile('./temp/kladrdb.7z', response).catch((error) => rej(error));
         res(1);
-      });
+      })
+      .on('error', (error) => rej(error));
     });
   }
 }
