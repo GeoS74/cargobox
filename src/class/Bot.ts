@@ -1,5 +1,6 @@
 export default abstract class Bot implements IBot {
   abstract tempFolder: string;
+
   state: BotState;
 
   error?: Error;

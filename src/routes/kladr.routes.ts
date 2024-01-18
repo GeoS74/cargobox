@@ -6,7 +6,7 @@ const router = new Router({ prefix: '/api/cargobox/kladr' });
 
 router.get(
   '/update',
-  tempFolder,
+  // tempFolder,
   kladr.startBot,
   // kladr.isRunningBot,
   kladr.update,

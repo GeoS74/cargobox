@@ -42,7 +42,7 @@ export async function update(ctx: Context, next: Next) {
 
     ctx.status = 200;
     ctx.body = answer;
-    return await next();
+    return next();
   }
   ctx.throw(400);
 }
