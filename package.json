@@ -30,10 +30,13 @@
     "ts-node": "^10.9.2"
   },
   "dependencies": {
+    "@types/node-7z": "^2.1.8",
+    "7zip-bin": "^5.2.0",
     "dbffile": "^1.9.3",
     "koa": "^2.15.0",
     "koa-router": "^12.0.1",
     "log4js": "^6.9.1",
+    "node-7z": "^3.0.0",
     "pg": "^8.11.3",
     "pg-types": "^4.0.1"
   }
