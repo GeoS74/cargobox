@@ -63,7 +63,7 @@ export default class Kladr extends Bot {
         await writeFile('./temp/kladrdb.7z', response).catch((error) => rej(error));
         res(1);
       })
-      .on('error', (error) => rej(error));
+      .once('error', (error) => rej(error));
     });
   }
 }
