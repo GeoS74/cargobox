@@ -1,16 +1,19 @@
 import https from 'https';
-import { writeFile, unlink } from 'fs/promises';
+import { writeFile } from 'fs/promises';
 import sevenBin from '7zip-bin';
 import { extractFull } from 'node-7z';
 import config from '../config';
 import Bot from './Bot';
 import { loggerChildProcess } from '../libs/logger';
+import { readdir, mkdir, rmdir } from 'fs/promises';
 
 // fs.unlink(file.filepath, (err) => {
 //   if (err) logger.error(err);
 // });
 
 export default class Kladr extends Bot {
+  tempFolder = './temp/kladr';
+
   parentSend(message: string) {
     switch (message) {
       case 'update':
@@ -30,8 +33,10 @@ export default class Kladr extends Bot {
     this.error = undefined;
 
     try {
-      await this.downloadKLADR().catch((error) => { throw error; });
-      await this.extractKLADR().catch((error) => { throw error; });
+      await this.createTempFolder();
+      // await this.downloadKLADR().catch((error) => { throw error; });
+      // await this.extractKLADR().catch((error) => { throw error; });
+      // await this.deleteTempFolder();
     } catch (error) {
       if (error instanceof Error) {
         loggerChildProcess.error(`update KLADR: ${error.message}`);
@@ -44,7 +49,7 @@ export default class Kladr extends Bot {
 
   async extractKLADR() {
     return new Promise((res, rej) => {
-      const seven = extractFull('./temp/kladrdb.7z', './temp/extract/kladr/', {
+      const seven = extractFull(`${this.tempFolder}/kladr_db.7z`, this.tempFolder, {
         $bin: sevenBin.path7za, // путь к скрипту распаковки архива
         $defer: false, // не создавать дочерний процесс
       });
@@ -60,10 +65,19 @@ export default class Kladr extends Bot {
           rej(new Error(`response status ${response.statusCode}`));
         }
 
-        await writeFile('./temp/kladrdb.7z', response).catch((error) => rej(error));
+        await writeFile(`${this.tempFolder}/kladr_db.7z`, response).catch((error) => rej(error));
         res(1);
       })
       .once('error', (error) => rej(error));
     });
+  }
+
+  async createTempFolder() {
+    return await readdir(this.tempFolder)
+    .catch(async () => mkdir(this.tempFolder, {recursive: true}));
+  }
+
+  async deleteTempFolder() {
+    await rmdir(this.tempFolder)
   }
 }

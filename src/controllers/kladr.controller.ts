@@ -32,7 +32,7 @@ export function stopBot(ctx: Context) {
   ctx.body = 'bot stopped';
 }
 
-export async function update(ctx: Context) {
+export async function update(ctx: Context, next: Next) {
   if (ctx.bot.connected && ctx.bot.command) {
     const answer = JSON.parse(await ctx.bot.command('update'));
 
@@ -42,7 +42,7 @@ export async function update(ctx: Context) {
 
     ctx.status = 200;
     ctx.body = answer;
-    return;
+    return await next();
   }
   ctx.throw(400);
 }
