@@ -43,7 +43,23 @@ const data: PoolConfig = {
       status text
     );
   `)
-    .then(() => logger.info('create table "users"'))
+    .then(() => logger.info('create table "cities"'))
+    .catch((error) => logger.warn(error.message));
+  
+    await pool.query(`
+    CREATE TABLE streets (
+      id SERIAL PRIMARY KEY,
+      name text,
+      socr text,
+      code text,
+      index text,
+      gninmb text,
+      uno text,
+      ocatd text,
+      city_id integer REFERENCES cities ON DELETE CASCADE
+    );
+  `)
+    .then(() => logger.info('create table "cities"'))
     .catch((error) => logger.warn(error.message));
 
   logger.info(`database "${config.postgres.database}" init complete`);

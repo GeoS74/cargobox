@@ -1,12 +1,18 @@
-export default abstract class Bot implements IBot {
+import {
+  readdir, mkdir, rmdir,
+} from 'fs/promises';
+
+type StateBot = {[index: string]: string | number}
+
+export default abstract class Bot {
   abstract tempFolder: string;
 
-  state: BotState;
+  state: StateBot
 
   error?: Error;
 
   constructor() {
-    this.state = 'wait';
+    this.state = {act: 'wait'};
     process.on('message', (message: string) => this.parentSend(message));
   }
 
@@ -22,8 +28,8 @@ export default abstract class Bot implements IBot {
 
   getState() {
     return {
-      state: this.state,
-      error: this.error?.message,
+      ...this.state,
+      error: this.error?.message || undefined,
     };
   }
 
@@ -31,5 +37,14 @@ export default abstract class Bot implements IBot {
     if (process.send) {
       process.send(JSON.stringify(data));
     }
+  }
+
+  async createTempFolder() {
+    return readdir(this.tempFolder)
+      .catch(async () => mkdir(this.tempFolder, { recursive: true }));
+  }
+
+  async deleteTempFolder() {
+    await rmdir(this.tempFolder);
   }
 }
