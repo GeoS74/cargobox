@@ -33,8 +33,8 @@ export default class Kladr extends Bot {
 
     try {
       await this.createTempFolder();
-      // await this.downloadKLADR().catch((error) => { throw error; });
-      // await this.extractKLADR().catch((error) => { throw error; });
+      await this.downloadKLADR().catch((error) => { throw error; });
+      await this.extractKLADR().catch((error) => { throw error; });
       await this.updateCities().catch((error) => { throw error; });
       await this.updateStreets().catch((error) => { throw error; });
       // await this.deleteTempFolder();
@@ -49,7 +49,7 @@ export default class Kladr extends Bot {
   }
 
   async downloadKLADR() {
-    this.state = {task: 'download KLADR.7z archive'};
+    this.state.task = 'download KLADR.7z archive';
 
     return new Promise((res, rej) => {
       https.get(`${config.catalog.kladr.db}`, async (response) => {

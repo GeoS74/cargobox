@@ -10,7 +10,8 @@
     "lint:fix": "eslint ./src --fix",
     "db:init": "ts-node ./src/libs/db.init.ts",
     "db:drop": "ts-node ./src/libs/db.init.ts --drop",
-    "db:load": "ts-node ./src/libs/db.load.ts --clean"
+    "db:load": "ts-node ./src/libs/db.load.ts --clean",
+    "db:kladr": "ts-node ./src/libs/db.kladr.toExcel.ts"
   },
   "repository": {
     "type": "git",
@@ -38,6 +39,7 @@
     "log4js": "^6.9.1",
     "node-7z": "^3.0.0",
     "pg": "^8.11.3",
-    "pg-types": "^4.0.1"
+    "pg-types": "^4.0.1",
+    "xlsx": "^0.18.5"
   }
 }
