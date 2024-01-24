@@ -10,6 +10,23 @@ import Bot from './Bot';
 import { loggerChildProcess } from '../libs/logger';
 import * as db from '../libs/db';
 
+
+// sql query
+// delete from streets where index='';
+// UPDATE cities SET status='1' WHERE code LIKE '__00000000000';
+// UPDATE cities SET status='2' WHERE socr='г' AND code LIKE '___________00';
+//
+// исправление названия в КЛАДР, это эдинственная строка верхнего уровня с таким багом
+// update cities set name='Чувашская', socr='Респ' where socr='Чувашия';
+//
+// create table _cities as select * from cities where status!='0';
+// CREATE TEMP TABLE temptable as SELECT * FROM _cities;
+// alter table _cities add column regcode text;
+// update _cities C set regcode=left((select code from temptable T where T.code=C.code limit 1), 2);
+
+
+
+
 export default class Kladr extends Bot {
   tempFolder = './temp/kladr';
 
