@@ -27,6 +27,36 @@ import * as db from '../libs/db';
 // update _cities C set regname=(select concat(name, ' ', lower(socr), case lower(socr) when 'край' then'' when 'чувашия' then '' else '.' end) from _cities T where T.regcode=C.regcode and status='1' limit 1);
 // update _cities set regname='' where name in ('Москва', 'Байконур', 'Санкт-Петербург', 'Севастополь');
 // update _cities set fullname=concat(name, ' ', socr, '.',  case regname when '' then '' else concat(' (', regname, ')') end);
+// delete from _cities where status='1' and socr!='г';
+
+// сравнить длину кодов городов и улиц
+// select distinct length(code) from streets;
+
+// select regcode, fullname from _cities order by regcode;
+
+/*
+create table tmp as 
+  select S.index, C.code from streets S
+    right join _cities C
+    on C.code=substring(S.code, '.{13}')
+    ;
+
+select C.fullname, T.index 
+  from _cities C
+  join tmp T 
+  on T.code=C.code;
+  ;
+
+update _cities C set index=array(select index from tmp T where T.code=C.code);
+
+// изменение типа данных со строки на массив строк, если есть данные в столбце
+alter table _cities alter index type text[] using index::text[];
+
+*/
+
+
+// записать результат вызова в массив
+// update foo set test=array(select name from bar) where id=2;
 
 
 
