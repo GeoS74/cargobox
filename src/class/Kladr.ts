@@ -13,16 +13,21 @@ import * as db from '../libs/db';
 
 // sql query
 // delete from streets where index='';
-// UPDATE cities SET status='1' WHERE code LIKE '__00000000000';
-// UPDATE cities SET status='2' WHERE socr='г' AND code LIKE '___________00';
+// UPDATE _cities SET status='2' WHERE socr='г' AND code LIKE '___________00';
+// UPDATE _cities SET status='1' WHERE code LIKE '__00000000000';
 //
 // исправление названия в КЛАДР, это эдинственная строка верхнего уровня с таким багом
-// update cities set name='Чувашская', socr='Респ' where socr='Чувашия';
+// update _cities set name='Чувашская', socr='Респ' where socr='Чувашия';
 //
 // create table _cities as select * from cities where status!='0';
+// alter table _cities add column regcode text, add column regname text, add column fullname text;
+//
 // CREATE TEMP TABLE temptable as SELECT * FROM _cities;
-// alter table _cities add column regcode text;
-// update _cities C set regcode=left((select code from temptable T where T.code=C.code limit 1), 2);
+// update _cities C set regcode=left((select code from _cities T where T.code=C.code limit 1), 2);
+// update _cities C set regname=(select concat(name, ' ', lower(socr), case lower(socr) when 'край' then'' when 'чувашия' then '' else '.' end) from _cities T where T.regcode=C.regcode and status='1' limit 1);
+// update _cities set regname='' where name in ('Москва', 'Байконур', 'Санкт-Петербург', 'Севастополь');
+// update _cities set fullname=concat(name, ' ', socr, '.',  case regname when '' then '' else concat(' (', regname, ')') end);
+
 
 
 
