@@ -23,7 +23,7 @@ import * as db from '../libs/db';
 // alter table _cities add column regcode text, add column regname text, add column fullname text;
 //
 // CREATE TEMP TABLE temptable as SELECT * FROM _cities;
-// update _cities C set regcode=left((select code from _cities T where T.code=C.code limit 1), 2);
+// update _cities set regcode=left(code, 2);
 // update _cities C set regname=(select concat(name, ' ', lower(socr), case lower(socr) when 'край' then'' when 'чувашия' then '' else '.' end) from _cities T where T.regcode=C.regcode and status='1' limit 1);
 // update _cities set regname='' where name in ('Москва', 'Байконур', 'Санкт-Петербург', 'Севастополь');
 // update _cities set fullname=concat(name, ' ', socr, '.',  case regname when '' then '' else concat(' (', regname, ')') end);
@@ -51,12 +51,10 @@ update _cities C set index=array(select index from tmp T where T.code=C.code);
 
 // изменение типа данных со строки на массив строк, если есть данные в столбце
 alter table _cities alter index type text[] using index::text[];
-
-*/
-
-
 // записать результат вызова в массив
 // update foo set test=array(select name from bar) where id=2;
+*/
+
 
 
 
