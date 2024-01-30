@@ -35,7 +35,7 @@ _pool.on('error', (error: unknown) => {
 });
 
 // module.exports.query = (text, params) => pool.query(text, params);
-export const query = async (text: string, params: unknown[]) => {
+export const query = async (text: string, params?: unknown[]) => {
   const client = await _pool.connect();
   const result = await client.query(text, params);
   client.release();

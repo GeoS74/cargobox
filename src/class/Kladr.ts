@@ -82,10 +82,16 @@ export default class Kladr extends Bot {
     this.error = undefined;
 
     try {
-      await this.createTempFolder();
-      await this.downloadKLADR().catch((error) => { throw error; });
-      await this.extractKLADR().catch((error) => { throw error; });
-      await this.updateCities().catch((error) => { throw error; });
+      // await this.createTempFolder();
+      // await this.downloadKLADR().catch((error) => { throw error; });
+      // await this.extractKLADR().catch((error) => { throw error; });
+      await this.createTableCities().catch((error) => { throw error; });
+      await this.getKladrCities()
+        .then(cities => this.addCities(cities))
+        .catch((error) => { throw error; });
+
+      // await this.addCities().catch((error) => { throw error; });
+      await this.createTableStreets().catch((error) => { throw error; });
       await this.updateStreets().catch((error) => { throw error; });
       // await this.deleteTempFolder();
     } catch (error) {
@@ -96,6 +102,131 @@ export default class Kladr extends Bot {
     }
 
     this.state.act = 'wait';
+  }
+
+  async processedTableCities(){
+    this.state.task = 'processed table cities';
+
+    try {
+      //step 1
+      await db.query(`UPDATE full_cities SET status='2' WHERE socr='г' AND code LIKE '___________00'`)
+        .catch((error) => { throw error; });
+      await db.query(`UPDATE full_cities SET status='1' WHERE code LIKE '__00000000000'`)
+        .catch((error) => { throw error; });
+      // await db.query(`CREATE TABLE _cities AS SELECT * FROM full_cities WHERE status !='0'`)
+      //   .catch((error) => { throw error; });
+      // await db.query(`DROP TABLE full_cities`)
+      //   .catch((error) => { throw error; });
+
+      //step 2
+      await db.query(`UPDATE _cities SET name='Чувашская', socr='Респ' WHERE socr='Чувашия'`)
+        .catch((error) => { throw error; });
+      
+      //step 3
+      await db.query(`ALTER TABLE _cities 
+          ADD COLUMN regcode TEXT, 
+          ADD COLUMN regname text, 
+          ADD COLUMN fullname text
+         `)
+        .catch((error) => { throw error; });
+      await db.query(`ALTER TABLE _cities DROP index`)
+        .catch((error) => { throw error; });
+      await db.query(`ALTER TABLE _cities ADD COLUMN index text[]`)
+        .catch((error) => { throw error; });
+      
+      //step 4
+      await db.query(`update _cities set regcode=left(code, 2)`)
+        .catch((error) => { throw error; });
+
+      //step 5
+      await db.query(`
+        UPDATE _cities C 
+          SET regname=(
+            SELECT CONCAT(
+              name, 
+              ' ', 
+              LOWER(socr), 
+              CASE lower(socr) 
+                WHEN 'край' THEN'' 
+                WHEN 'чувашия' THEN '' 
+                ELSE '.' 
+              END
+            ) 
+            FROM _cities T 
+            WHERE T.regcode=C.regcode and status='1' limit 1)
+      `)
+        .catch((error) => { throw error; });
+      await db.query(`
+      UPDATE _cities 
+          SET regname='' 
+          WHERE name IN ('Москва', 'Байконур', 'Санкт-Петербург', 'Севастополь');
+      `)
+        .catch((error) => { throw error; });
+
+      //step 6
+      await db.query(`
+        UPDATE _cities 
+          SET fullname=concat(
+            name, 
+            ' ', 
+            socr, 
+            '.',  
+            CASE regname 
+              WHEN '' THEN '' 
+              ELSE concat(' (', regname, ')') 
+            END
+        )
+      `)
+        .catch((error) => { throw error; });
+      
+      // step 7
+      await db.query(`DELETE FROM _cities WHERE status='1' AND socr!='г'`)
+        .catch((error) => { throw error; });
+      await db.query(``)
+        .catch((error) => { throw error; });
+      await db.query(``)
+        .catch((error) => { throw error; });
+      await db.query(``)
+        .catch((error) => { throw error; });
+
+
+    } catch (error) {
+      if (error instanceof Error) {
+        loggerChildProcess.error(`update KLADR: ${error.message}`);
+        this.error = error;
+      }
+    }
+  }
+
+  async createTableCities() {
+    return db.query(`
+      CREATE TABLE full_cities (
+        id SERIAL PRIMARY KEY,
+        name text,
+        socr text,
+        code text,
+        index text,
+        gninmb text,
+        uno text,
+        ocatd text,
+        status text
+      )
+    `)
+  }
+
+  async createTableStreets() {
+    return db.query(`
+      CREATE TABLE IF NOT EXISTS streets (
+        id SERIAL PRIMARY KEY,
+        name text,
+        socr text,
+        code text,
+        index text,
+        gninmb text,
+        uno text,
+        ocatd text
+      )
+    `)
   }
 
   async downloadKLADR() {
@@ -115,7 +246,7 @@ export default class Kladr extends Bot {
   }
 
   async extractKLADR() {
-    this.state = {task: 'extract KLADR.7z archive'};
+    this.state.task = 'extract KLADR.7z archive';
 
     return new Promise((res, rej) => {
       const seven = extractFull(`${this.tempFolder}/kladr_db.7z`, this.tempFolder, {
@@ -127,27 +258,26 @@ export default class Kladr extends Bot {
     });
   }
 
-  async updateCities() {
-    this.state.task = 'update cities KLADR';
-
-    const kladr = await DBFFile.open(`${this.tempFolder}/KLADR.DBF`, {
+  async getKladrCities() {
+    return DBFFile.open(`${this.tempFolder}/KLADR.DBF`, {
       encoding: 'cp866',
     });
+  }
+
+  async addCities(cities: DBFFile) {
+    this.state.task = 'write cities for temp table _cities';
 
     let counter = 0;
-    for await (const city of kladr) {
-      // if (city.SOCR === 'г') {
-
+    for await (const city of cities) {
         await this.writeCity(city)
           .then(() => {
             if (counter % 250 === 0) {
-              this.state.task = `insert ${counter} city in ${kladr.recordCount} cities`
-              loggerChildProcess.info(`insert ${counter} rows in ${kladr.recordCount}`);
+              this.state.task = `insert ${counter} city in ${cities.recordCount} cities`
+              loggerChildProcess.info(`insert ${counter} rows in ${cities.recordCount}`);
             }
           })
           .catch((error) => loggerChildProcess.error(error.message))
           .finally(() => counter += 1);
-      // }
     }
   }
 
@@ -178,7 +308,7 @@ export default class Kladr extends Bot {
 
   async writeCity(city: Record<string, unknown>) {
     return db.query(`
-      INSERT INTO cities 
+      INSERT INTO full_cities 
         (name, 
           socr, 
           code, 
