@@ -19,7 +19,7 @@ import * as db from '../libs/db';
 // исправление названия в КЛАДР, это эдинственная строка верхнего уровня с таким багом
 // update _cities set name='Чувашская', socr='Респ' where socr='Чувашия';
 //
-// alter index type text[] using array[index];
+// alter table _cities alter index type text[] using array[index];
 //
 // create table _cities as select * from cities where status!='0';
 // alter table _cities add column regcode text, add column regname text, add column fullname text;
@@ -37,19 +37,22 @@ import * as db from '../libs/db';
 // select regcode, fullname from _cities order by regcode;
 
 /*
-create table tmp as 
+create table indexes as 
   select S.index, C.code from streets S
     right join _cities C
     on C.code=substring(S.code, '.{13}')
     ;
 
+    create index idx_icode on indexes(code);
+
+
 select C.fullname, T.index 
   from _cities C
-  join tmp T 
+  join indexes T 
   on T.code=C.code;
   ;
 
-update _cities C set index=array(select index from tmp T where T.code=C.code);
+update _cities C set index=array(select index from indexes T where T.code=C.code);
 
 // изменение типа данных со строки на массив строк, если есть данные в столбце
 alter table _cities alter index type text[] using index::text[];
@@ -84,21 +87,38 @@ export default class Kladr extends Bot {
     this.error = undefined;
 
     try {
-      // await this.createTempFolder();
-      // await this.downloadKLADR().catch((error) => { throw error; });
-      // await this.extractKLADR().catch((error) => { throw error; });
-      await this.createTableCities().catch((error) => { throw error; });
-      await this.getKladrCities()
-        .then(cities => this.addCities(cities))
+      await Promise.resolve()
+        // .then(() => this.createTempFolder())
+        // .then(() => this.downloadKLADR())
+        // .then(() => this.extractKLADR())
+
+        // .then(() => this.createTableStreets())
+        // .then(() => this.getKladrStreets())
+        // .then(streets => this.addStreets(cities))
+
+        // .then(() => this.createTableCities())
+        // .then(() => this.getKladrCities())
+        // .then(cities => this.addCities(cities))
+        // .then(() => this.processedCities())
+
+        // .then(streets => this.createTableIndexes(cities))
+        // .then(() => this.dropTableStreets())
+
         .catch((error) => { throw error; });
 
+      // await this.downloadKLADR().catch((error) => { throw error; });
+      // await this.extractKLADR().catch((error) => { throw error; });
+      // await this.createTableCities().catch((error) => { throw error; });
+      // await this.getKladrCities()
+      //   .then(cities => this.addCities(cities))
+      //   .catch((error) => { throw error; });
+
       // await this.addCities().catch((error) => { throw error; });
-      await this.createTableStreets().catch((error) => { throw error; });
-      await this.updateStreets().catch((error) => { throw error; });
+      // await this.createTasreets().catch((error) => { throw error; });
       // await this.deleteTempFolder();
     } catch (error) {
       if (error instanceof Error) {
-        loggerChildProcess.error(`update KLADR: ${error.message}`);
+        loggerChildProcess.error(`error update KLADR: ${error.message}`);
         this.error = error;
       }
     }
@@ -106,103 +126,79 @@ export default class Kladr extends Bot {
     this.state.act = 'wait';
   }
 
-  async processedTableCities(){
-    this.state.task = 'processed table cities';
+  async processedCities(){
+    this.state.task = 'processed cities step 1';
 
-    try {
-      //step 1
-      await db.query(`UPDATE full_cities SET status='2' WHERE socr='г' AND code LIKE '___________00'`)
-        .catch((error) => { throw error; });
-      await db.query(`UPDATE full_cities SET status='1' WHERE code LIKE '__00000000000'`)
-        .catch((error) => { throw error; });
-      // await db.query(`CREATE TABLE _cities AS SELECT * FROM full_cities WHERE status !='0'`)
-      //   .catch((error) => { throw error; });
-      // await db.query(`DROP TABLE full_cities`)
-      //   .catch((error) => { throw error; });
-
-      //step 2
-      await db.query(`UPDATE _cities SET name='Чувашская', socr='Респ' WHERE socr='Чувашия'`)
-        .catch((error) => { throw error; });
-      
-      //step 3
-      await db.query(`ALTER TABLE _cities 
-          ADD COLUMN regcode TEXT, 
-          ADD COLUMN regname text, 
-          ADD COLUMN fullname text
-         `)
-        .catch((error) => { throw error; });
-      await db.query(`ALTER TABLE _cities DROP index`)
-        .catch((error) => { throw error; });
-      await db.query(`ALTER TABLE _cities ADD COLUMN index text[]`)
-        .catch((error) => { throw error; });
-      
-      //step 4
-      await db.query(`update _cities set regcode=left(code, 2)`)
-        .catch((error) => { throw error; });
-
-      //step 5
-      await db.query(`
-        UPDATE _cities C 
-          SET regname=(
-            SELECT CONCAT(
+    return Promise.resolve()
+      // step 1
+        .then(() => this.state.task = 'processed cities step 1')
+        .then(() => db.query(`UPDATE _cities SET status='2' WHERE socr='г' AND code LIKE '___________00'`))
+        .then(() => db.query(`UPDATE _cities SET status='1' WHERE code LIKE '__00000000000'`))
+      // step 2
+        .then(() => this.state.task = 'processed cities step 2')
+        .then(() => db.query(`update _cities set name='Чувашская', socr='Респ' where socr='Чувашия'`))
+      // step 3
+        .then(() => this.state.task = 'processed cities step 3')
+        .then(() => db.query(`create table cities as select * from _cities where status!='0'`))
+        // .then(() => db.query(`drop table _cities`))
+      // step 4
+        .then(() => this.state.task = 'processed cities step 4')
+        .then(() => db.query(`
+          alter table cities 
+            add column regcode text, 
+            add column regname text, 
+            add column fullname text,
+            alter index type text[] using array[index]
+        `))
+      // step 5
+        .then(() => this.state.task = 'processed cities step 5')
+        .then(() => db.query(`update cities set regcode=left(code, 2)`))
+      // step 6
+        .then(() => this.state.task = 'processed cities step 6')
+        .then(() => db.query(`
+          update cities C 
+            set regname=(
+              select concat(
+                name, 
+                ' ', 
+                lower(socr), 
+                case lower(socr) 
+                  when 'край' then'' 
+                  when 'чувашия' then '' 
+                  else '.' 
+                end
+              ) 
+              from cities T 
+              where T.regcode=C.regcode and status='1' limit 1)
+        `))
+        .then(() => db.query(`
+          update cities 
+            set regname='' 
+            where name in ('Москва', 'Байконур', 'Санкт-Петербург', 'Севастополь')
+        `))
+      // step 7
+        .then(() => this.state.task = 'processed cities step 7')
+        .then(() => db.query(`
+          update cities 
+            set fullname=concat(
               name, 
               ' ', 
-              LOWER(socr), 
-              CASE lower(socr) 
-                WHEN 'край' THEN'' 
-                WHEN 'чувашия' THEN '' 
-                ELSE '.' 
-              END
-            ) 
-            FROM _cities T 
-            WHERE T.regcode=C.regcode and status='1' limit 1)
-      `)
-        .catch((error) => { throw error; });
-      await db.query(`
-      UPDATE _cities 
-          SET regname='' 
-          WHERE name IN ('Москва', 'Байконур', 'Санкт-Петербург', 'Севастополь');
-      `)
-        .catch((error) => { throw error; });
-
-      //step 6
-      await db.query(`
-        UPDATE _cities 
-          SET fullname=concat(
-            name, 
-            ' ', 
-            socr, 
-            '.',  
-            CASE regname 
-              WHEN '' THEN '' 
-              ELSE concat(' (', regname, ')') 
-            END
-        )
-      `)
-        .catch((error) => { throw error; });
-      
-      // step 7
-      await db.query(`DELETE FROM _cities WHERE status='1' AND socr!='г'`)
-        .catch((error) => { throw error; });
-      await db.query(``)
-        .catch((error) => { throw error; });
-      await db.query(``)
-        .catch((error) => { throw error; });
-      await db.query(``)
-        .catch((error) => { throw error; });
-
-
-    } catch (error) {
-      if (error instanceof Error) {
-        loggerChildProcess.error(`update KLADR: ${error.message}`);
-        this.error = error;
-      }
-    }
+              socr, 
+              '.',  
+              case regname 
+                when '' then '' 
+                else concat(' (', regname, ')') 
+              end
+            )
+        `))
+      // step 8
+        .then(() => this.state.task = 'processed cities step 8')
+        .then(() => db.query(`delete from cities where status='1' and socr!='г'`))
   }
 
   async createTableCities() {
     return db.query(`
-      CREATE TABLE full_cities (
+      CREATE TABLE _cities (
         id SERIAL PRIMARY KEY,
         name text,
         socr text,
@@ -218,7 +214,7 @@ export default class Kladr extends Bot {
 
   async createTableStreets() {
     return db.query(`
-      CREATE TABLE IF NOT EXISTS streets (
+      CREATE TABLE streets (
         id SERIAL PRIMARY KEY,
         name text,
         socr text,
@@ -229,6 +225,16 @@ export default class Kladr extends Bot {
         ocatd text
       )
     `)
+  }
+
+  async createTableIndexes() {
+    return db.query(`
+      create table if not exists indexes as
+        select S.index, C.code from streets S
+          right join cities C
+          on C.code=substring(S.code, '.{13}')
+    `)
+    .then(() => db.query(`create index if not exists idx_icode on indexes(code)`))
   }
 
   async downloadKLADR() {
@@ -266,6 +272,12 @@ export default class Kladr extends Bot {
     });
   }
 
+  async getKladrStreets() {
+    return DBFFile.open(`${this.tempFolder}/STREET.DBF`, {
+      encoding: 'cp866',
+    });
+  }
+
   async addCities(cities: DBFFile) {
     this.state.task = 'write cities for temp table _cities';
 
@@ -283,20 +295,14 @@ export default class Kladr extends Bot {
     }
   }
 
-  async updateStreets() {
+  async addStreets(streets: DBFFile) {
     this.state.task = 'update streets KLADR';
-
-    const streets = await DBFFile.open(`${this.tempFolder}/STREET.DBF`, {
-      encoding: 'cp866',
-    });
-
-    // loggerChildProcess.error(streets.recordCount)
-    // loggerChildProcess.error(`Field names: ${streets.fields.map(f => f.name).join(', ')}`)
 
     let counter = 0;
     for await (const street of streets) {
-
-        await this.writeStreet(street)
+        if(!!street['index']) {
+          
+          await this.writeStreet(street)
           .then(() => {
             if (counter % 250 === 0) {
               this.state.task = `insert ${counter} street in ${streets.recordCount} streets`
@@ -305,12 +311,13 @@ export default class Kladr extends Bot {
           })
           .catch((error) => loggerChildProcess.error(error.message))
           .finally(() => counter += 1);
+        }
     }
   }
 
   async writeCity(city: Record<string, unknown>) {
     return db.query(`
-      INSERT INTO full_cities 
+      INSERT INTO _cities 
         (name, 
           socr, 
           code, 
@@ -330,8 +337,7 @@ export default class Kladr extends Bot {
       city.UNO,
       city.OCATD,
       city.STATUS,
-    ])
-      .catch((error) => loggerChildProcess.error(error.message));
+    ]);
   }
 
   async writeStreet(city: Record<string, unknown>) {
@@ -355,6 +361,5 @@ export default class Kladr extends Bot {
       city.UNO,
       city.OCATD,
     ])
-      .catch((error) => loggerChildProcess.error(error.message));
   }
 }
