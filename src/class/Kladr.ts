@@ -88,34 +88,24 @@ export default class Kladr extends Bot {
 
     try {
       await Promise.resolve()
-        // .then(() => this.createTempFolder())
-        // .then(() => this.downloadKLADR())
-        // .then(() => this.extractKLADR())
+        .then(() => this.createTempFolder())
+        .then(() => this.downloadKLADR())
+        .then(() => this.extractKLADR())
 
-        // .then(() => this.createTableStreets())
-        // .then(() => this.getKladrStreets())
-        // .then(streets => this.addStreets(cities))
+        .then(() => this.createTableStreets())
+        .then(() => this.getKladrStreets())
+        .then(streets => this.addStreets(streets))
 
-        // .then(() => this.createTableCities())
-        // .then(() => this.getKladrCities())
-        // .then(cities => this.addCities(cities))
-        // .then(() => this.processedCities())
+        .then(() => this.createTableCities())
+        .then(() => this.getKladrCities())
+        .then(cities => this.addCities(cities))
+        .then(() => this.processedCities())
 
-        // .then(streets => this.createTableIndexes(cities))
-        // .then(() => this.dropTableStreets())
+        .then(() => this.createTableIndexes())
+        .then(() => this.dropTableStreets())
 
         .catch((error) => { throw error; });
 
-      // await this.downloadKLADR().catch((error) => { throw error; });
-      // await this.extractKLADR().catch((error) => { throw error; });
-      // await this.createTableCities().catch((error) => { throw error; });
-      // await this.getKladrCities()
-      //   .then(cities => this.addCities(cities))
-      //   .catch((error) => { throw error; });
-
-      // await this.addCities().catch((error) => { throw error; });
-      // await this.createTasreets().catch((error) => { throw error; });
-      // await this.deleteTempFolder();
     } catch (error) {
       if (error instanceof Error) {
         loggerChildProcess.error(`error update KLADR: ${error.message}`);
