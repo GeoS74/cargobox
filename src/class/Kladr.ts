@@ -19,6 +19,8 @@ import * as db from '../libs/db';
 // исправление названия в КЛАДР, это эдинственная строка верхнего уровня с таким багом
 // update _cities set name='Чувашская', socr='Респ' where socr='Чувашия';
 //
+// alter index type text[] using array[index];
+//
 // create table _cities as select * from cities where status!='0';
 // alter table _cities add column regcode text, add column regname text, add column fullname text;
 //
