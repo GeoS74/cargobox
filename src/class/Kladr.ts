@@ -102,7 +102,7 @@ export default class Kladr extends Bot {
         .then(() => this.processedCities())
 
         .then(() => this.createTableIndexes())
-        .then(() => this.dropTableStreets())
+        // .then(() => this.dropTableStreets())
 
         .catch((error) => { throw error; });
 

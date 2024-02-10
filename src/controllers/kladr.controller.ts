@@ -25,7 +25,7 @@ export async function startBot(ctx: Context, next: Next) {
 }
 
 export function stopBot(ctx: Context) {
-  if (ctx.bot.connected) {
+  if (ctx.bot && ctx.bot.connected) {
     ctx.bot.kill();
     ctx.status = 200;
     ctx.body = 'bot stopped';
