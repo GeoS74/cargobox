@@ -82,20 +82,22 @@ export default class Kladr extends Bot {
     try {
       await Promise.resolve()
         .then(() => this.createTempFolder())
-        .then(() => this.downloadKLADR())
-        .then(() => this.extractKLADR())
+        // .then(() => this.downloadKLADR())
+        // .then(() => this.extractKLADR())
 
+        .then(() => this.dropTable('streets'))
         .then(() => this.createTableStreets())
         .then(() => this.getKladrStreets())
         .then((streets) => this.addStreets(streets))
 
-        .then(() => this.createTableCities())
-        .then(() => this.getKladrCities())
-        .then((cities) => this.addCities(cities))
-        .then(() => this.processedCities())
+      // .then(() => this.dropTable('_cities'))
+      // .then(() => this.createTableCities())
+      // .then(() => this.getKladrCities())
+      // .then((cities) => this.addCities(cities))
+      // .then(() => this.processedCities())
 
-        .then(() => this.createTableIndexes())
-        // .then(() => this.dropTableStreets())
+      // .then(() => this.createTableIndexes())
+      // .then(() => this.dropTableStreets())
 
         .catch((error) => { throw error; });
     } catch (error) {
@@ -282,7 +284,7 @@ export default class Kladr extends Bot {
 
     let counter = 0;
     for await (const street of streets) {
-      if (street.index) {
+      if (street.INDEX) {
         await this.writeStreet(street)
           .then(() => {
             if (counter % 250 === 0) {
@@ -342,5 +344,9 @@ export default class Kladr extends Bot {
       city.UNO,
       city.OCATD,
     ]);
+  }
+
+  async dropTable(tableName: string) {
+    return db.query(`DROP TABLE IF EXISTS ${tableName}`);
   }
 }

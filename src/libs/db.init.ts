@@ -11,7 +11,7 @@ const data: PoolConfig = {
 };
 
 (async () => {
-  let pool = new Pool(data);
+  const pool = new Pool(data);
 
   // dropped database
   if (process.argv[2] === '--drop') {
@@ -27,40 +27,40 @@ const data: PoolConfig = {
     .catch((error) => logger.warn(error.message));
 
   // connect new database
-  data.database = config.postgres.database;
-  pool = new Pool(data);
+  // data.database = config.postgres.database;
+  // pool = new Pool(data);
 
-  await pool.query(`
-    CREATE TABLE cities (
-      id SERIAL PRIMARY KEY,
-      name text,
-      socr text,
-      code text,
-      index text,
-      gninmb text,
-      uno text,
-      ocatd text,
-      status text
-    );
-  `)
-    .then(() => logger.info('create table "cities"'))
-    .catch((error) => logger.warn(error.message));
+  // await pool.query(`
+  //   CREATE TABLE cities (
+  //     id SERIAL PRIMARY KEY,
+  //     name text,
+  //     socr text,
+  //     code text,
+  //     index text,
+  //     gninmb text,
+  //     uno text,
+  //     ocatd text,
+  //     status text
+  //   );
+  // `)
+  //   .then(() => logger.info('create table "cities"'))
+  //   .catch((error) => logger.warn(error.message));
 
-  await pool.query(`
-    CREATE TABLE streets (
-      id SERIAL PRIMARY KEY,
-      name text,
-      socr text,
-      code text,
-      index text,
-      gninmb text,
-      uno text,
-      ocatd text,
-      city_id integer REFERENCES cities ON DELETE CASCADE
-    );
-  `)
-    .then(() => logger.info('create table "cities"'))
-    .catch((error) => logger.warn(error.message));
+  // await pool.query(`
+  //   CREATE TABLE streets (
+  //     id SERIAL PRIMARY KEY,
+  //     name text,
+  //     socr text,
+  //     code text,
+  //     index text,
+  //     gninmb text,
+  //     uno text,
+  //     ocatd text,
+  //     city_id integer REFERENCES cities ON DELETE CASCADE
+  //   );
+  // `)
+  //   .then(() => logger.info('create table "cities"'))
+  //   .catch((error) => logger.warn(error.message));
 
   logger.info(`database "${config.postgres.database}" init complete`);
   process.exit();

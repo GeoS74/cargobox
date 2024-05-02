@@ -1,5 +1,6 @@
 import log4js from 'log4js';
 import path from 'path';
+import config from '../config';
 
 log4js.configure({
   appenders: {
@@ -22,7 +23,7 @@ log4js.configure({
     },
     childProcess: {
       appenders: ['out', 'appChildProcess'],
-      level: 'error',
+      level: config.node.env === 'dev' ? 'all' : 'error',
     },
   },
 });

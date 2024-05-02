@@ -14,12 +14,12 @@ export function createBot(botName: botName): IChildBot {
     }
 
     // дочерний процесс может быть неожиданно завершён
-    // если это произошло, то вызов bot.send(message) подвешивает промис
-    // чтобы завершить промис используется слушатель события exit
-    bot.once('exit', () => rej(new Error(`bot ${botName} exited`)));
+    // если это произошло, то вызов bot.send(message) подвесит промис
+    // для завершения промиса используется слушатель события disconnect
+    bot.once('disconnect', () => rej(new Error(`bot ${botName} disconnected`)));
   })
   // удалить всех слушателей событий
-  .finally(() => bot.removeAllListeners());
+    .finally(() => bot.removeAllListeners());
 
   return bot;
 }
