@@ -1,8 +1,9 @@
 import { Pool, PoolConfig } from 'pg';
-const XLSX = require('xlsx');
 import path from 'path';
 import { logger } from './logger';
 import config from '../config';
+
+const XLSX = require('xlsx');
 
 const data: PoolConfig = {
   user: config.postgres.user,
@@ -19,10 +20,10 @@ const tempFolder = './temp/kladr';
 
   const cities = await pool.query('SELECT * FROM cities')
     .then((res) => res.rows)
-    .then(cities => cities.map(city => Object.values(city)));
+    .then((cities) => cities.map((city) => Object.values(city)));
 
-  let workbook = XLSX.utils.book_new();
-  let worksheet = XLSX.utils.aoa_to_sheet(cities);
+  const workbook = XLSX.utils.book_new();
+  const worksheet = XLSX.utils.aoa_to_sheet(cities);
   XLSX.utils.book_append_sheet(workbook, worksheet);
   XLSX.writeFile(workbook, `${tempFolder}/cities.xlsx`);
 

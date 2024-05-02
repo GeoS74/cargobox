@@ -2,17 +2,17 @@ import {
   readdir, mkdir, rmdir,
 } from 'fs/promises';
 
-type StateBot = {[index: string]: string | number}
+type StateBot = { [index: string]: string | number };
 
 export default abstract class Bot {
   abstract tempFolder: string;
 
-  state: StateBot
+  state: StateBot;
 
   error?: Error;
 
   constructor() {
-    this.state = {act: 'wait'};
+    this.state = { act: 'wait' };
     process.on('message', (message: string) => this.parentSend(message));
   }
 

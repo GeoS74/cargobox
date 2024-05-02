@@ -10,7 +10,6 @@ import Bot from './Bot';
 import { loggerChildProcess } from '../libs/logger';
 import * as db from '../libs/db';
 
-
 // sql query
 // delete from streets where index='';
 // UPDATE _cities SET status='2' WHERE socr='г' AND code LIKE '___________00';
@@ -37,7 +36,7 @@ import * as db from '../libs/db';
 // select regcode, fullname from _cities order by regcode;
 
 /*
-create table indexes as 
+create table indexes as
   select S.index, C.code from streets S
     right join _cities C
     on C.code=substring(S.code, '.{13}')
@@ -45,10 +44,9 @@ create table indexes as
 
     create index idx_icode on indexes(code);
 
-
-select C.fullname, T.index 
+select C.fullname, T.index
   from _cities C
-  join indexes T 
+  join indexes T
   on T.code=C.code;
   ;
 
@@ -59,11 +57,6 @@ alter table _cities alter index type text[] using index::text[];
 // записать результат вызова в массив
 // update foo set test=array(select name from bar) where id=2;
 */
-
-
-
-
-
 
 export default class Kladr extends Bot {
   tempFolder = './temp/kladr';
@@ -94,18 +87,17 @@ export default class Kladr extends Bot {
 
         .then(() => this.createTableStreets())
         .then(() => this.getKladrStreets())
-        .then(streets => this.addStreets(streets))
+        .then((streets) => this.addStreets(streets))
 
         .then(() => this.createTableCities())
         .then(() => this.getKladrCities())
-        .then(cities => this.addCities(cities))
+        .then((cities) => this.addCities(cities))
         .then(() => this.processedCities())
 
         .then(() => this.createTableIndexes())
         // .then(() => this.dropTableStreets())
 
         .catch((error) => { throw error; });
-
     } catch (error) {
       if (error instanceof Error) {
         loggerChildProcess.error(`error update KLADR: ${error.message}`);
@@ -116,24 +108,24 @@ export default class Kladr extends Bot {
     this.state.act = 'wait';
   }
 
-  async processedCities(){
+  async processedCities() {
     this.state.task = 'processed cities step 1';
 
     return Promise.resolve()
       // step 1
-        .then(() => this.state.task = 'processed cities step 1')
-        .then(() => db.query(`UPDATE _cities SET status='2' WHERE socr='г' AND code LIKE '___________00'`))
-        .then(() => db.query(`UPDATE _cities SET status='1' WHERE code LIKE '__00000000000'`))
+      .then(() => this.state.task = 'processed cities step 1')
+      .then(() => db.query('UPDATE _cities SET status=\'2\' WHERE socr=\'г\' AND code LIKE \'___________00\''))
+      .then(() => db.query('UPDATE _cities SET status=\'1\' WHERE code LIKE \'__00000000000\''))
       // step 2
-        .then(() => this.state.task = 'processed cities step 2')
-        .then(() => db.query(`update _cities set name='Чувашская', socr='Респ' where socr='Чувашия'`))
+      .then(() => this.state.task = 'processed cities step 2')
+      .then(() => db.query('update _cities set name=\'Чувашская\', socr=\'Респ\' where socr=\'Чувашия\''))
       // step 3
-        .then(() => this.state.task = 'processed cities step 3')
-        .then(() => db.query(`create table cities as select * from _cities where status!='0'`))
-        // .then(() => db.query(`drop table _cities`))
+      .then(() => this.state.task = 'processed cities step 3')
+      .then(() => db.query('create table cities as select * from _cities where status!=\'0\''))
+    // .then(() => db.query(`drop table _cities`))
       // step 4
-        .then(() => this.state.task = 'processed cities step 4')
-        .then(() => db.query(`
+      .then(() => this.state.task = 'processed cities step 4')
+      .then(() => db.query(`
           alter table cities 
             add column regcode text, 
             add column regname text, 
@@ -141,11 +133,11 @@ export default class Kladr extends Bot {
             alter index type text[] using array[index]
         `))
       // step 5
-        .then(() => this.state.task = 'processed cities step 5')
-        .then(() => db.query(`update cities set regcode=left(code, 2)`))
+      .then(() => this.state.task = 'processed cities step 5')
+      .then(() => db.query('update cities set regcode=left(code, 2)'))
       // step 6
-        .then(() => this.state.task = 'processed cities step 6')
-        .then(() => db.query(`
+      .then(() => this.state.task = 'processed cities step 6')
+      .then(() => db.query(`
           update cities C 
             set regname=(
               select concat(
@@ -161,14 +153,14 @@ export default class Kladr extends Bot {
               from cities T 
               where T.regcode=C.regcode and status='1' limit 1)
         `))
-        .then(() => db.query(`
+      .then(() => db.query(`
           update cities 
             set regname='' 
             where name in ('Москва', 'Байконур', 'Санкт-Петербург', 'Севастополь')
         `))
       // step 7
-        .then(() => this.state.task = 'processed cities step 7')
-        .then(() => db.query(`
+      .then(() => this.state.task = 'processed cities step 7')
+      .then(() => db.query(`
           update cities 
             set fullname=concat(
               name, 
@@ -182,8 +174,8 @@ export default class Kladr extends Bot {
             )
         `))
       // step 8
-        .then(() => this.state.task = 'processed cities step 8')
-        .then(() => db.query(`delete from cities where status='1' and socr!='г'`))
+      .then(() => this.state.task = 'processed cities step 8')
+      .then(() => db.query('delete from cities where status=\'1\' and socr!=\'г\''));
   }
 
   async createTableCities() {
@@ -199,7 +191,7 @@ export default class Kladr extends Bot {
         ocatd text,
         status text
       )
-    `)
+    `);
   }
 
   async createTableStreets() {
@@ -214,7 +206,7 @@ export default class Kladr extends Bot {
         uno text,
         ocatd text
       )
-    `)
+    `);
   }
 
   async createTableIndexes() {
@@ -224,7 +216,7 @@ export default class Kladr extends Bot {
           right join cities C
           on C.code=substring(S.code, '.{13}')
     `)
-    .then(() => db.query(`create index if not exists idx_icode on indexes(code)`))
+      .then(() => db.query('create index if not exists idx_icode on indexes(code)'));
   }
 
   async downloadKLADR() {
@@ -273,15 +265,15 @@ export default class Kladr extends Bot {
 
     let counter = 0;
     for await (const city of cities) {
-        await this.writeCity(city)
-          .then(() => {
-            if (counter % 250 === 0) {
-              this.state.task = `insert ${counter} city in ${cities.recordCount} cities`
-              loggerChildProcess.info(`insert ${counter} rows in ${cities.recordCount}`);
-            }
-          })
-          .catch((error) => loggerChildProcess.error(error.message))
-          .finally(() => counter += 1);
+      await this.writeCity(city)
+        .then(() => {
+          if (counter % 250 === 0) {
+            this.state.task = `insert ${counter} city in ${cities.recordCount} cities`;
+            loggerChildProcess.info(`insert ${counter} rows in ${cities.recordCount}`);
+          }
+        })
+        .catch((error) => loggerChildProcess.error(error.message))
+        .finally(() => counter += 1);
     }
   }
 
@@ -290,18 +282,17 @@ export default class Kladr extends Bot {
 
     let counter = 0;
     for await (const street of streets) {
-        if(!!street['index']) {
-          
-          await this.writeStreet(street)
+      if (street.index) {
+        await this.writeStreet(street)
           .then(() => {
             if (counter % 250 === 0) {
-              this.state.task = `insert ${counter} street in ${streets.recordCount} streets`
+              this.state.task = `insert ${counter} street in ${streets.recordCount} streets`;
               loggerChildProcess.info(`insert ${counter} rows in ${streets.recordCount}`);
             }
           })
           .catch((error) => loggerChildProcess.error(error.message))
           .finally(() => counter += 1);
-        }
+      }
     }
   }
 
@@ -350,6 +341,6 @@ export default class Kladr extends Bot {
       city.GNINMB,
       city.UNO,
       city.OCATD,
-    ])
+    ]);
   }
 }

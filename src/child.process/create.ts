@@ -7,35 +7,17 @@ export function createBot(botName: botName): IChildBot {
     env: { botName },
   });
 
-  bot.command = (message) => new Promise((res) => {
+  bot.command = (message) => new Promise((res, rej) => {
     if (bot.connected) {
       bot.once('message', (answer) => res(answer));
       bot.send(message);
     }
+
+    // дочерний процесс может быть неожиданно завершён
+    // если это произошло, то вызов bot.send(message) подвешивает промис
+    // чтобы завершить промис используется слушатель события exit
+    bot.once('exit', () => rej(new Error(`bot ${botName} exited`)));
   });
+
   return bot;
 }
-
-// process.on('message', (message) => {
-//   if(process.send){
-//     process.send(`you say ${message}`)
-//   }
-// })
-// import path from "path"
-
-// import(`../class/${process.env.botName}`)
-//   .then(Bot => new Bot())
-//   .catch(() => {
-//     console.log('---------')
-//     console.log(`../class/${process.env.botName}`)
-//     console.log(path.join(__dirname, `../class/${process.env.botName}`))
-//   })
-
-// import Bot from `../class/${process.env.botName}`;
-
-// new Bot()
-
-// const {Bot} = require(`../class/${process.env.botName}`)
-// (() => new Bot())();
-
-// process.exit();

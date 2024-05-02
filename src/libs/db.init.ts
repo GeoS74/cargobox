@@ -45,8 +45,8 @@ const data: PoolConfig = {
   `)
     .then(() => logger.info('create table "cities"'))
     .catch((error) => logger.warn(error.message));
-  
-    await pool.query(`
+
+  await pool.query(`
     CREATE TABLE streets (
       id SERIAL PRIMARY KEY,
       name text,

@@ -6,7 +6,8 @@ let bot: IChildBot;
 
 export async function isRunningBot(ctx: Context, next: Next) {
   if (ctx.bot.connected && ctx.bot.command) {
-    const answer = await ctx.bot.command('state');
+    const answer = await ctx.bot.command('state')
+      .catch((error: Error) => ctx.throw(500, error.message));
 
     if (JSON.parse(answer).state === 'run') {
       ctx.throw(400, 'bot run...');
@@ -36,7 +37,8 @@ export function stopBot(ctx: Context) {
 
 export async function update(ctx: Context, next: Next) {
   if (ctx.bot.connected && ctx.bot.command) {
-    const answer = JSON.parse(await ctx.bot.command('update'));
+    const answer = JSON.parse(await ctx.bot.command('update'))
+      .catch((error: Error) => ctx.throw(500, error.message));
 
     if (answer?.error) {
       ctx.throw(400, answer.error);
@@ -46,13 +48,20 @@ export async function update(ctx: Context, next: Next) {
     ctx.body = answer;
     return next();
   }
-  ctx.throw(400);
+
+  // линтер требует указать return перед ctx.throw, т.к. в этой функции есть "return next()"  
+  // правило "consistent-return" предполагает указывать return если в функции есть хоть один return, возвращающий значение
+  // интересно, что в функции "async function state(...)" линтер не требует return перед ctx.throw
+  // т.к. функция state и так и так ничего не возвращает
+  return ctx.throw(400);           
 }
 
 export async function state(ctx: Context) {
   if (ctx.bot.connected && ctx.bot.command) {
     ctx.status = 200;
-    ctx.body = await ctx.bot.command('state');
+    ctx.body = await ctx.bot.command('state')
+      .catch((error: Error) => ctx.throw(500, error.message));
+
     return;
   }
   ctx.throw(400);
