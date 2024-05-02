@@ -17,7 +17,9 @@ export function createBot(botName: botName): IChildBot {
     // если это произошло, то вызов bot.send(message) подвешивает промис
     // чтобы завершить промис используется слушатель события exit
     bot.once('exit', () => rej(new Error(`bot ${botName} exited`)));
-  });
+  })
+  // удалить всех слушателей событий
+  .finally(() => bot.removeAllListeners());
 
   return bot;
 }

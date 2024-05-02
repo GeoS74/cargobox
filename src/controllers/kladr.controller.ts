@@ -9,7 +9,7 @@ export async function isRunningBot(ctx: Context, next: Next) {
     const answer = await ctx.bot.command('state')
       .catch((error: Error) => ctx.throw(500, error.message));
 
-    if (JSON.parse(answer).state === 'run') {
+    if (JSON.parse(answer).act === 'run') {
       ctx.throw(400, 'bot run...');
     }
   }
@@ -37,15 +37,15 @@ export function stopBot(ctx: Context) {
 
 export async function update(ctx: Context, next: Next) {
   if (ctx.bot.connected && ctx.bot.command) {
-    const answer = JSON.parse(await ctx.bot.command('update'))
+    const answer = await ctx.bot.command('update')
       .catch((error: Error) => ctx.throw(500, error.message));
 
-    if (answer?.error) {
+    if (JSON.parse(answer)?.error) {
       ctx.throw(400, answer.error);
     }
 
     ctx.status = 200;
-    ctx.body = answer;
+    ctx.body = JSON.parse(answer);
     return next();
   }
 
