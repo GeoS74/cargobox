@@ -1,7 +1,5 @@
 import https from 'https';
-import {
-  writeFile, readdir, mkdir, rmdir,
-} from 'fs/promises';
+import { writeFile } from 'fs/promises';
 import sevenBin from '7zip-bin';
 import { extractFull } from 'node-7z';
 import { DBFFile } from 'dbffile';
@@ -9,54 +7,6 @@ import config from '../config';
 import Bot from './Bot';
 import { loggerChildProcess } from '../libs/logger';
 import * as db from '../libs/db';
-
-// sql query
-// delete from streets where index='';
-// UPDATE _cities SET status='2' WHERE socr='г' AND code LIKE '___________00';
-// UPDATE _cities SET status='1' WHERE code LIKE '__00000000000';
-//
-// исправление названия в КЛАДР, это эдинственная строка верхнего уровня с таким багом
-// update _cities set name='Чувашская', socr='Респ' where socr='Чувашия';
-//
-// alter table _cities alter index type text[] using array[index];
-//
-// create table _cities as select * from cities where status!='0';
-// alter table _cities add column regcode text, add column regname text, add column fullname text;
-//
-// CREATE TEMP TABLE temptable as SELECT * FROM _cities;
-// update _cities set regcode=left(code, 2);
-// update _cities C set regname=(select concat(name, ' ', lower(socr), case lower(socr) when 'край' then'' when 'чувашия' then '' else '.' end) from _cities T where T.regcode=C.regcode and status='1' limit 1);
-// update _cities set regname='' where name in ('Москва', 'Байконур', 'Санкт-Петербург', 'Севастополь');
-// update _cities set fullname=concat(name, ' ', socr, '.',  case regname when '' then '' else concat(' (', regname, ')') end);
-// delete from _cities where status='1' and socr!='г';
-
-// сравнить длину кодов городов и улиц
-// select distinct length(code) from streets;
-
-// select regcode, fullname from _cities order by regcode;
-
-/*
-create table indexes as
-  select S.index, C.code from streets S
-    right join _cities C
-    on C.code=substring(S.code, '.{13}')
-    ;
-
-    create index idx_icode on indexes(code);
-
-select C.fullname, T.index
-  from _cities C
-  join indexes T
-  on T.code=C.code;
-  ;
-
-update _cities C set index=array(select index from indexes T where T.code=C.code);
-
-// изменение типа данных со строки на массив строк, если есть данные в столбце
-alter table _cities alter index type text[] using index::text[];
-// записать результат вызова в массив
-// update foo set test=array(select name from bar) where id=2;
-*/
 
 export default class Kladr extends Bot {
   tempFolder = './temp/kladr';
@@ -82,22 +32,29 @@ export default class Kladr extends Bot {
     try {
       await Promise.resolve()
         .then(() => this.createTempFolder())
-        // .then(() => this.downloadKLADR())
-        // .then(() => this.extractKLADR())
+        .then(() => this.downloadKLADR())
+        .then(() => this.extractKLADR())
 
         .then(() => this.dropTable('streets'))
         .then(() => this.createTableStreets())
         .then(() => this.getKladrStreets())
         .then((streets) => this.addStreets(streets))
 
-      // .then(() => this.dropTable('_cities'))
-      // .then(() => this.createTableCities())
-      // .then(() => this.getKladrCities())
-      // .then((cities) => this.addCities(cities))
-      // .then(() => this.processedCities())
+        .then(() => this.dropTable('_cities'))
+        .then(() => this.createTableCities())
+        .then(() => this.getKladrCities())
+        .then((cities) => this.addCities(cities))
 
-      // .then(() => this.createTableIndexes())
-      // .then(() => this.dropTableStreets())
+        .then(() => this.processedCities())
+
+        .then(() => this.dropTable('indexes'))
+        .then(() => this.createTableIndexes())
+        .then(() => this.addIndexesFromCities())
+
+        .then(() => this.dropTable('_cities'))
+        .then(() => this.dropTable('indexes'))
+        .then(() => this.dropTable('streets'))
+        .then(() => this.deleteTempFolder())
 
         .catch((error) => { throw error; });
     } catch (error) {
@@ -115,18 +72,17 @@ export default class Kladr extends Bot {
 
     return Promise.resolve()
       // step 1
-      .then(() => this.state.task = 'processed cities step 1')
+      .then(() => { this.state.task = 'processed cities step 1'; })
       .then(() => db.query('UPDATE _cities SET status=\'2\' WHERE socr=\'г\' AND code LIKE \'___________00\''))
       .then(() => db.query('UPDATE _cities SET status=\'1\' WHERE code LIKE \'__00000000000\''))
       // step 2
-      .then(() => this.state.task = 'processed cities step 2')
+      .then(() => { this.state.task = 'processed cities step 2'; })
       .then(() => db.query('update _cities set name=\'Чувашская\', socr=\'Респ\' where socr=\'Чувашия\''))
       // step 3
-      .then(() => this.state.task = 'processed cities step 3')
+      .then(() => { this.state.task = 'processed cities step 3'; })
       .then(() => db.query('create table cities as select * from _cities where status!=\'0\''))
-    // .then(() => db.query(`drop table _cities`))
       // step 4
-      .then(() => this.state.task = 'processed cities step 4')
+      .then(() => { this.state.task = 'processed cities step 4'; })
       .then(() => db.query(`
           alter table cities 
             add column regcode text, 
@@ -135,10 +91,10 @@ export default class Kladr extends Bot {
             alter index type text[] using array[index]
         `))
       // step 5
-      .then(() => this.state.task = 'processed cities step 5')
+      .then(() => { this.state.task = 'processed cities step 5'; })
       .then(() => db.query('update cities set regcode=left(code, 2)'))
       // step 6
-      .then(() => this.state.task = 'processed cities step 6')
+      .then(() => { this.state.task = 'processed cities step 6'; })
       .then(() => db.query(`
           update cities C 
             set regname=(
@@ -147,7 +103,7 @@ export default class Kladr extends Bot {
                 ' ', 
                 lower(socr), 
                 case lower(socr) 
-                  when 'край' then'' 
+                  when 'край' then '' 
                   when 'чувашия' then '' 
                   else '.' 
                 end
@@ -161,7 +117,7 @@ export default class Kladr extends Bot {
             where name in ('Москва', 'Байконур', 'Санкт-Петербург', 'Севастополь')
         `))
       // step 7
-      .then(() => this.state.task = 'processed cities step 7')
+      .then(() => { this.state.task = 'processed cities step 7'; })
       .then(() => db.query(`
           update cities 
             set fullname=concat(
@@ -176,7 +132,7 @@ export default class Kladr extends Bot {
             )
         `))
       // step 8
-      .then(() => this.state.task = 'processed cities step 8')
+      .then(() => { this.state.task = 'processed cities step 8'; })
       .then(() => db.query('delete from cities where status=\'1\' and socr!=\'г\''));
   }
 
@@ -214,11 +170,18 @@ export default class Kladr extends Bot {
   async createTableIndexes() {
     return db.query(`
       create table if not exists indexes as
-        select S.index, C.code from streets S
-          right join cities C
-          on C.code=substring(S.code, '.{13}')
-    `)
-      .then(() => db.query('create index if not exists idx_icode on indexes(code)'));
+        select distinct S.index, C.code from streets S
+          join cities C
+          on substring(C.code, '.{10}') =substring(S.code, '.{10}')
+    `);
+    // .then(() => db.query('create index if not exists idx_icode on indexes(code)'));
+  }
+
+  async addIndexesFromCities() {
+    return db.query(`
+      update cities C 
+        set index=array(select index from indexes I where I.code=C.code)
+    `);
   }
 
   async downloadKLADR() {
@@ -268,14 +231,13 @@ export default class Kladr extends Bot {
     let counter = 0;
     for await (const city of cities) {
       await this.writeCity(city)
-        .then(() => {
-          if (counter % 250 === 0) {
-            this.state.task = `insert ${counter} city in ${cities.recordCount} cities`;
-            loggerChildProcess.info(`insert ${counter} rows in ${cities.recordCount}`);
-          }
-        })
-        .catch((error) => loggerChildProcess.error(error.message))
-        .finally(() => counter += 1);
+        .catch((error) => loggerChildProcess.error(error.message));
+
+      if (counter % 250 === 0) {
+        this.state.task = `insert ${counter} city in ${cities.recordCount} cities`;
+        loggerChildProcess.info(`insert ${counter} rows in ${cities.recordCount}`);
+      }
+      counter += 1;
     }
   }
 
@@ -286,14 +248,13 @@ export default class Kladr extends Bot {
     for await (const street of streets) {
       if (street.INDEX) {
         await this.writeStreet(street)
-          .then(() => {
-            if (counter % 250 === 0) {
-              this.state.task = `insert ${counter} street in ${streets.recordCount} streets`;
-              loggerChildProcess.info(`insert ${counter} rows in ${streets.recordCount}`);
-            }
-          })
-          .catch((error) => loggerChildProcess.error(error.message))
-          .finally(() => counter += 1);
+          .catch((error) => loggerChildProcess.error(error.message));
+
+        if (counter % 250 === 0) {
+          this.state.task = `insert ${counter} street in ${streets.recordCount} streets`;
+          loggerChildProcess.info(`insert ${counter} rows in ${streets.recordCount}`);
+        }
+        counter += 1;
       }
     }
   }

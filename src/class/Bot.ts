@@ -1,5 +1,5 @@
 import {
-  readdir, mkdir, rmdir,
+  readdir, mkdir, rm,
 } from 'fs/promises';
 
 type StateBot = { [index: string]: string | number };
@@ -45,6 +45,6 @@ export default abstract class Bot {
   }
 
   async deleteTempFolder() {
-    await rmdir(this.tempFolder);
+    await rm(this.tempFolder, { recursive: true });
   }
 }

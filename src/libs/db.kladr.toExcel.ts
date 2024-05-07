@@ -1,9 +1,7 @@
 import { Pool, PoolConfig } from 'pg';
-import path from 'path';
+import XLSX from 'xlsx'; // const XLSX = require('xlsx');
 import { logger } from './logger';
 import config from '../config';
-
-const XLSX = require('xlsx');
 
 const data: PoolConfig = {
   user: config.postgres.user,

@@ -1,4 +1,4 @@
-import { Pool, /*PoolConfig*/ } from 'pg';
+import { Pool /* PoolConfig */ } from 'pg';
 
 import { logger } from './logger';
 import config from '../config';

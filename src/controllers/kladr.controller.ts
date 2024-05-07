@@ -51,7 +51,8 @@ export async function update(ctx: Context, next: Next) {
   }
 
   // линтер требует указать return перед ctx.throw, т.к. в этой функции есть "return next()"
-  // правило "consistent-return" предполагает указывать return если в функции есть хоть один return, возвращающий значение
+  // правило "consistent-return" предполагает указывать return
+  // если в функции есть хоть один return, возвращающий значение
   // интересно, что в функции "async function state(...)" линтер не требует return перед ctx.throw
   // т.к. функция state и так и так ничего не возвращает
   return ctx.throw(400);
