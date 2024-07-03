@@ -6,7 +6,7 @@ let bot: IChildBot;
 
 export async function startBot(ctx: Context, next: Next) {
   if (!bot || !bot.connected) {
-    bot = createBot('Kladr');
+    bot = createBot(ctx.botName);
   }
   ctx.bot = bot;
   await next();

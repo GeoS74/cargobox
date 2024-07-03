@@ -6,7 +6,7 @@ declare module '_bot' {
   }
 }
 
-type botName = 'Kladr';
+type botName = 'Kladr' | 'Delline';
 
 // interface BotState {
 //   // state: 'run' | 'wait'
