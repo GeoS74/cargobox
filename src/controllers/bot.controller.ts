@@ -1,14 +1,10 @@
 import { Context, Next } from 'koa';
-import { IChildBot } from '_bot';
 import { createBot } from '../child.process/create';
 
-let bot: IChildBot;
-
 export async function startBot(ctx: Context, next: Next) {
-  if (!bot || !bot.connected) {
-    bot = createBot(ctx.botName);
+  if (!ctx.bot || !ctx.bot.connected) {
+    ctx.bot = createBot(ctx.bot.name);
   }
-  ctx.bot = bot;
   await next();
 }
 
@@ -54,4 +50,17 @@ export async function state(ctx: Context) {
     return;
   }
   ctx.throw(400);
+}
+
+export async function isRun(ctx: Context, next: Next) {
+  if (ctx.bot.connected && ctx.bot.command) {
+    const answer = await ctx.bot.command('state')
+      .catch((error: Error) => ctx.throw(500, error.message));
+
+    if (JSON.parse(answer).act === 'run') {
+      ctx.throw(400, 'bot is run...');
+    }
+  }
+
+  await next();
 }

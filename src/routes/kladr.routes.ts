@@ -1,20 +1,30 @@
 import Router from 'koa-router';
-import * as kladr from '../controllers/kladr.controller';
-import * as bot from '../middleware/bot.checked';
+import { Context, Next } from 'koa';
+import { IChildBot } from '_bot';
+import * as bot from '../controllers/bot.controller';
 
 const router = new Router({ prefix: '/api/cargobox/kladr' });
 
+let _bot: IChildBot;
+
+router.use(async (ctx: Context, next: Next) => {
+  _bot.name = 'Kladr';
+  ctx.bot = _bot;
+
+  await next();
+});
+
 router.get(
   '/update',
-  kladr.startBot,
+  bot.startBot,
   bot.isRun,
-  kladr.update,
+  bot.update,
 );
 router.get(
   '/state',
-  kladr.startBot,
-  kladr.state,
+  bot.startBot,
+  bot.state,
 );
-router.get('/stop', kladr.stopBot);
+router.get('/stop', bot.stopBot);
 
 export default router.routes();
