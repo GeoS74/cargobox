@@ -22,6 +22,9 @@ export default class Delline extends Bot {
     this.state.act = 'run';
     this.error = undefined;
 
+    /////////////////
+    // ...code...
+
     this.state.act = 'wait';
   }
 }
