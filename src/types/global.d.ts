@@ -13,8 +13,6 @@ declare module '_bot' {
   }
 }
 
-// type botName = 'Kladr' | 'Delline';
-
 // interface BotState {
 //   // state: 'run' | 'wait'
 //   // error?: string | undefined;
