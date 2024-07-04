@@ -3,6 +3,7 @@ import Bot from './Bot';
 export default class Delline extends Bot {
   tempFolder = './temp/Delline';
 
+  // Override
   parentSend(message: string) {
     switch (message) {
       case 'update':

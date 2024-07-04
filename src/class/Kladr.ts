@@ -11,6 +11,7 @@ import * as db from '../libs/db';
 export default class Kladr extends Bot {
   tempFolder = './temp/kladr';
 
+  // Override
   parentSend(message: string) {
     switch (message) {
       case 'update':
