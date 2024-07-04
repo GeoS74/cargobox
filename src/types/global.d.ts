@@ -4,7 +4,6 @@ declare module '_bot' {
   export type IChildBotName = 'Kladr' | 'Delline';
 
   export interface IChildBot extends childProcess.ChildProcess {
-    name?: IChildBotName
     command?: (message: string) => Promise<unknown>
   }
 }

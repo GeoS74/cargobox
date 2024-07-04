@@ -3,7 +3,7 @@ import { createBot } from '../child.process/create';
 
 export async function startBot(ctx: Context, next: Next) {
   if (!ctx.bot || !ctx.bot.connected) {
-    ctx.bot = createBot(ctx.bot.name);
+    ctx.bot = createBot(ctx.botName);
   }
   await next();
 }

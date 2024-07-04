@@ -1,30 +1,21 @@
 import Router from 'koa-router';
 import { Context, Next } from 'koa';
-import { IChildBot } from '_bot';
-import * as bot from '../controllers/bot.controller';
+import { IChildBot, IChildBotName } from '_bot';
+import nested from './bot.nested..routes'
 
 const router = new Router({ prefix: '/api/cargobox/delline' });
 
 let _bot: IChildBot;
 
+// adding in context bot name and link for child process
 router.use(async (ctx: Context, next: Next) => {
-  _bot.name = 'Delline';
+  const name: IChildBotName = 'Delline'
+  ctx.botName = name;
   ctx.bot = _bot;
 
   await next();
 });
-
-router.get(
-  '/update',
-  bot.startBot,
-  bot.isRun,
-  bot.update,
-);
-router.get(
-  '/state',
-  bot.startBot,
-  bot.state,
-);
-router.get('/stop', bot.stopBot);
+// nested routes for bot API
+router.use(nested.routes())
 
 export default router.routes();
