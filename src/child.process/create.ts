@@ -1,9 +1,9 @@
 import path from 'path';
 import childProcess from 'child_process';
-import { IChildBot, IChildBotName } from '_bot';
+import { IChildProcess, IChildBotName } from '_bot';
 
-export function createBot(botName: IChildBotName): IChildBot {
-  const bot: IChildBot = childProcess.fork(path.join(__dirname, './run'), [], {
+export function createBot(botName: IChildBotName): IChildProcess {
+  const bot: IChildProcess = childProcess.fork(path.join(__dirname, './run'), [], {
     env: { botName },
   });
 
