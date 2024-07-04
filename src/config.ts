@@ -1,3 +1,8 @@
+import * as path from 'path';
+import * as dotenv from 'dotenv';
+
+dotenv.config({ path: path.join(__dirname, './secret.env') });
+
 export default {
   node: {
     env: process.env.NODE_ENV || 'dev',
