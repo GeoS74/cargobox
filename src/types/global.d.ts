@@ -13,6 +13,11 @@ declare module '_bot' {
   }
 }
 
+type City = {
+  code: string
+  fullname: string
+};
+
 // interface BotState {
 //   // state: 'run' | 'wait'
 //   // error?: string | undefined;
