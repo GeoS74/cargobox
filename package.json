@@ -31,6 +31,8 @@
     "ts-node": "^10.9.2"
   },
   "dependencies": {
+    "@koa/cors": "^5.0.0",
+    "@types/koa__cors": "^5.0.0",
     "@types/node-7z": "^2.1.8",
     "7zip-bin": "^5.2.0",
     "dbffile": "^1.9.3",
